@@ -1,6 +1,6 @@
 {
   "name": "babylonjs-hook",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "react babylonjs hook",
   "keywords": ["react", "babylonjs", "hook"],
   "main": "dist/babylonjs-hook.umd.js",
