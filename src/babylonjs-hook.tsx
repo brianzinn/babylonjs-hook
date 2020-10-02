@@ -1,16 +1,21 @@
-import React, { useEffect, useRef, useState, createContext } from 'react'
+import React, { useEffect, useContext, useRef, useState, createContext } from 'react'
 import { Engine, Scene, Nullable, EngineOptions, SceneOptions } from '@babylonjs/core'
 
 export type BabylonjsProps = {
     antialias?: boolean
     engineOptions?: EngineOptions
     adaptToDeviceRatio?: boolean
+    renderChildrenWhenReady?: boolean
     sceneOptions?: SceneOptions
     onSceneReady: (scene: Scene) => void
     onRender?: (scene: Scene) => void
     id: string
     children: React.ReactNode
 };
+
+export const useEngine = (): Nullable<Engine> => useContext(SceneContext).engine
+export const useScene = (): Nullable<Scene> => useContext(SceneContext).scene
+export const useCanvas = (): Nullable<HTMLCanvasElement | WebGLRenderingContext> => useContext(SceneContext).canvas
 
 export type SceneContextType = {
     engine: Nullable<Engine>
@@ -31,7 +36,7 @@ export const SceneContext = createContext<SceneContextType>(DEFAULT_CONTEXT);
 
 export default (props: BabylonjsProps) => {
     const reactCanvas = useRef<Nullable<HTMLCanvasElement>>(null);
-    const { antialias, engineOptions, adaptToDeviceRatio, sceneOptions, onRender, onSceneReady, ...rest } = props;
+    const { antialias, engineOptions, adaptToDeviceRatio, sceneOptions, onRender, onSceneReady, renderChildrenWhenReady, children, ...rest } = props;
 
     const [sceneContext, setSceneContext] = useState<SceneContextType>(DEFAULT_CONTEXT)
 
@@ -39,7 +44,8 @@ export default (props: BabylonjsProps) => {
         if (reactCanvas.current) {
             const engine = new Engine(reactCanvas.current, antialias, engineOptions, adaptToDeviceRatio);
             const scene = new Scene(engine, sceneOptions);
-            if (scene.isReady()) {
+            const sceneIsReady = scene.isReady();
+            if (sceneIsReady) {
                 props.onSceneReady(scene)
             } else {
                 scene.onReadyObservable.addOnce((scene) => {
@@ -72,7 +78,7 @@ export default (props: BabylonjsProps) => {
                 canvas: reactCanvas.current,
                 scene,
                 engine,
-                sceneReady: scene.isReady(),
+                sceneReady: sceneIsReady,
             }));
 
             return () => {
@@ -89,7 +95,9 @@ export default (props: BabylonjsProps) => {
         <>
             <canvas ref={reactCanvas} {...rest} />
             <SceneContext.Provider value={sceneContext}>
-                {props.children}
+                {(renderChildrenWhenReady !== true || (renderChildrenWhenReady === true && sceneContext.sceneReady)) &&
+                    children
+                }
             </SceneContext.Provider>
         </>
     );
