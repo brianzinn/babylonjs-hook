@@ -1,0 +1,40 @@
+name: make_release
+
+on:
+  workflow_dispatch:
+    inputs:
+      npmVersion:
+        description: 'NPM Version (<newversion> | major | minor | patch | premajor | preminor | prepatch | prerelease | ...)'
+        required: true
+        default: 'patch'
+# push:
+#    branches: [ master ]
+  
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+          registry-url: 'https://registry.npmjs.org'
+          scope: brianzinn
+          
+      - name: Configure git
+        run: |
+          git config user.email "github@wakeskate.com"
+          git config user.name "Brian Zinn"
+
+      - name: install-build
+        run: |
+          yarn install
+          yarn build
+      - run: echo "version -- ${{ github.event.inputs.npmVersion }}"
+      - run: npm version ${{ github.event.inputs.npmVersion }} -m "release %s :package:"
+      - run: git push && git push --tags
+      - name: publish-npm
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
