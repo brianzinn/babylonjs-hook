@@ -10,7 +10,7 @@ export type BabylonjsProps = {
     onSceneReady: (scene: Scene) => void
     onRender?: (scene: Scene) => void
     id: string
-    children: React.ReactNode
+    children?: React.ReactNode
 };
 
 export const useEngine = (): Nullable<Engine> => useContext(SceneContext).engine
