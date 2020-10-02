@@ -29,7 +29,7 @@ jobs:
 
       - name: install-build
         run: |
-          yarn install
+          yarn install --frozen-lockfile
           yarn build
       - run: echo "version -- ${{ github.event.inputs.npmVersion }}"
       - run: npm version ${{ github.event.inputs.npmVersion }} -m "release %s :package:"
