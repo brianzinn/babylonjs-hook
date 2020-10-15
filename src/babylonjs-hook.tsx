@@ -1,5 +1,5 @@
 import React, { useEffect, useContext, useRef, useState, createContext } from 'react'
-import { Engine, Scene, Nullable, EngineOptions, SceneOptions } from '@babylonjs/core'
+import { Engine, Scene, Nullable, EngineOptions, SceneOptions, EventState, Observer } from '@babylonjs/core'
 
 export type BabylonjsProps = {
     antialias?: boolean
@@ -13,9 +13,74 @@ export type BabylonjsProps = {
     children?: React.ReactNode
 };
 
+/**
+ * Get the engine from the context.
+ */
 export const useEngine = (): Nullable<Engine> => useContext(SceneContext).engine
+/**
+ * Get the scene from the context.
+ */
 export const useScene = (): Nullable<Scene> => useContext(SceneContext).scene
+/**
+ * Get the canvas DOM element from the context.
+ */
 export const useCanvas = (): Nullable<HTMLCanvasElement | WebGLRenderingContext> => useContext(SceneContext).canvas
+
+export type OnFrameRenderFn = (eventData: Scene, eventState: EventState) => void
+
+/**
+ * Register a callback for before the scene renders.
+ * 
+ * @param callback called using onBeforeRender functionality of scene
+ * @param mask the mask used to filter observers
+ * @param insertFirst if true will be inserted at first position, if false (default) will be last position.
+ * @param callOnce only call the callback once
+ */
+export const useBeforeRender = (callback: OnFrameRenderFn, mask?: number, insertFirst?: boolean, callOnce?: boolean): void => {
+    const { scene } = useContext(SceneContext);
+
+    useEffect(() => {
+        if (scene === null) {
+            return;
+        }
+
+        const unregisterOnFirstCall: boolean = callOnce === true;
+        const sceneObserver: Nullable<Observer<Scene>> = scene.onBeforeRenderObservable.add(callback, mask, insertFirst, undefined, unregisterOnFirstCall);
+
+        if (unregisterOnFirstCall !== true) {
+            return () => {
+                scene.onBeforeRenderObservable.remove(sceneObserver);
+            }
+        }
+    })
+}
+
+/**
+ * Register a callback for after the scene renders.
+ * 
+ * @param callback called using onBeforeRender functionality of scene
+ * @param mask the mask used to filter observers
+ * @param insertFirst if true will be inserted at first position, if false (default) will be last position.
+ * @param callOnce only call the callback once
+ */
+export function useAfterRender(callback: OnFrameRenderFn, mask?: number, insertFirst?: boolean, callOnce?: boolean): void {
+    const { scene } = useContext(SceneContext);
+
+    useEffect(() => {
+        if (scene === null) {
+            return;
+        }
+
+        const unregisterOnFirstCall: boolean = callOnce === true;
+        const sceneObserver: Nullable<Observer<Scene>> = scene.onAfterRenderObservable.add(callback, mask, insertFirst, undefined, unregisterOnFirstCall);
+
+        if (unregisterOnFirstCall !== true) {
+            return () => {
+                scene.onAfterRenderObservable.remove(sceneObserver);
+            }
+        }
+    })
+}
 
 export type SceneContextType = {
     engine: Nullable<Engine>
