@@ -1,5 +1,5 @@
 import React, { useEffect, useContext, useRef, useState, createContext } from 'react'
-import { Engine, Scene, Nullable, EngineOptions, SceneOptions, EventState, Observer } from '@babylonjs/core'
+import { Engine, Scene, Nullable, EngineOptions, SceneOptions, EventState, Observer, Camera } from '@babylonjs/core'
 
 export type BabylonjsProps = {
     antialias?: boolean
@@ -63,7 +63,7 @@ export const useBeforeRender = (callback: OnFrameRenderFn, mask?: number, insert
  * @param insertFirst if true will be inserted at first position, if false (default) will be last position.
  * @param callOnce only call the callback once
  */
-export function useAfterRender(callback: OnFrameRenderFn, mask?: number, insertFirst?: boolean, callOnce?: boolean): void {
+export const useAfterRender = (callback: OnFrameRenderFn, mask?: number, insertFirst?: boolean, callOnce?: boolean): void => {
     const { scene } = useContext(SceneContext);
 
     useEffect(() => {
@@ -80,6 +80,44 @@ export function useAfterRender(callback: OnFrameRenderFn, mask?: number, insertF
             }
         }
     })
+}
+
+/**
+ * Handles creating a camera and attaching/disposing.
+ *
+ * @param createCameraFn function that creates and returns a camera
+ * @param autoAttach Attach the input controls (default true)
+ * @param noPreventDefault Events caught by controls should call prevent default
+ */
+export const useCamera = <T extends Camera>(createCameraFn: (scene: Scene) => T, autoAttach: boolean = true, noPreventDefault: boolean = true): Nullable<T> => {
+    const { scene } = useContext(SceneContext);
+    const cameraRef = useRef<Nullable<T>>(null);
+
+    useEffect(() => {
+        if (scene === null) {
+            console.warn('cannot create camera (scene not ready)')
+            return;
+        }
+
+        const camera = createCameraFn(scene);
+        if (autoAttach === true) {
+            const canvas: HTMLCanvasElement = scene.getEngine()!.getRenderingCanvas()!;
+
+            // This attaches the camera to the canvas
+            camera.attachControl(canvas, noPreventDefault);
+        }
+        cameraRef.current = camera;
+
+        return () => {
+            if (autoAttach === true) {
+                const canvas: HTMLCanvasElement = scene.getEngine()!.getRenderingCanvas()!;
+                camera.detachControl(canvas);
+            }
+            camera.dispose();
+        }
+    }, [scene])
+
+    return cameraRef.current;
 }
 
 export type SceneContextType = {
@@ -125,10 +163,16 @@ export default (props: BabylonjsProps) => {
             }
 
             engine.runRenderLoop(() => {
-                if (typeof onRender === 'function') {
-                    onRender(scene);
+                if (scene.activeCamera) {
+                    if (typeof onRender === 'function') {
+                        onRender(scene);
+                    }
+                    scene.render();
+                } else {
+                    // @babylonjs/core throws an error if you attempt to render with no active camera.
+                    // if we attach as a child React component we have frames with no active camera.
+                    console.warn('no active camera..')
                 }
-                scene.render();
             })
 
             const resize = () => {
