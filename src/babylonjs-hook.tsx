@@ -76,7 +76,7 @@ export const useAfterRender = (callback: OnFrameRenderFn, mask?: number, insertF
 
 /**
  * Handles creating a camera and attaching/disposing.
- *
+ * TODO: add new 4.2 parameters: useCtrlForPanning & panningMouseButton
  * @param createCameraFn function that creates and returns a camera
  * @param autoAttach Attach the input controls (default true)
  * @param noPreventDefault Events caught by controls should call prevent default
@@ -96,14 +96,15 @@ export const useCamera = <T extends Camera>(createCameraFn: (scene: Scene) => T,
             const canvas: HTMLCanvasElement = scene.getEngine()!.getRenderingCanvas()!;
 
             // This attaches the camera to the canvas
-            camera.attachControl(canvas, noPreventDefault);
+            // https://github.com/BabylonJS/Babylon.js/pull/9192 (keep canvas to work with < 4.2 beta-13)
+            (camera as any).attachControl(canvas, noPreventDefault);
         }
         cameraRef.current = camera;
 
         return () => {
             if (autoAttach === true) {
                 const canvas: HTMLCanvasElement = scene.getEngine()!.getRenderingCanvas()!;
-                camera.detachControl(canvas);
+                (camera as any).detachControl(canvas);
             }
             camera.dispose();
         }
