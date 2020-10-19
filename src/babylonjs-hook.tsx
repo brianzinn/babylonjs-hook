@@ -1,5 +1,10 @@
-import React, { useEffect, useContext, useRef, useState, createContext } from 'react'
-import { Engine, Scene, Nullable, EngineOptions, SceneOptions, EventState, Observer, Camera } from '@babylonjs/core'
+import React, { useEffect, useContext, useRef, useState } from 'react';
+import { Engine, Scene, Nullable, EngineOptions, SceneOptions, EventState, Observer, Camera } from '@babylonjs/core';
+import { SceneContext, SceneContextType } from './scene';
+import { EngineCanvasContext, EngineCanvasContextType } from './engine';
+
+export * from './engine';
+export * from './scene';
 
 export type BabylonjsProps = {
     antialias?: boolean
@@ -12,19 +17,6 @@ export type BabylonjsProps = {
     id: string
     children?: React.ReactNode
 };
-
-/**
- * Get the engine from the context.
- */
-export const useEngine = (): Nullable<Engine> => useContext(SceneContext).engine
-/**
- * Get the scene from the context.
- */
-export const useScene = (): Nullable<Scene> => useContext(SceneContext).scene
-/**
- * Get the canvas DOM element from the context.
- */
-export const useCanvas = (): Nullable<HTMLCanvasElement | WebGLRenderingContext> => useContext(SceneContext).canvas
 
 export type OnFrameRenderFn = (eventData: Scene, eventState: EventState) => void
 
@@ -95,7 +87,7 @@ export const useCamera = <T extends Camera>(createCameraFn: (scene: Scene) => T,
 
     useEffect(() => {
         if (scene === null) {
-            console.warn('cannot create camera (scene not ready)')
+            console.warn('cannot create camera (scene not ready)');
             return;
         }
 
@@ -115,41 +107,37 @@ export const useCamera = <T extends Camera>(createCameraFn: (scene: Scene) => T,
             }
             camera.dispose();
         }
-    }, [scene])
+    }, [scene]);
 
     return cameraRef.current;
 }
-
-export type SceneContextType = {
-    engine: Nullable<Engine>
-    canvas: Nullable<HTMLCanvasElement | WebGLRenderingContext>
-    scene: Nullable<Scene>
-    sceneReady: boolean
-}
-
-const DEFAULT_CONTEXT: SceneContextType = {
-    engine: null,
-    canvas: null,
-    scene: null,
-    sceneReady: false
-}
-
-// TODO: build a fallback mechanism when typeof React.createContext !== 'function'
-export const SceneContext = createContext<SceneContextType>(DEFAULT_CONTEXT);
 
 export default (props: BabylonjsProps) => {
     const reactCanvas = useRef<Nullable<HTMLCanvasElement>>(null);
     const { antialias, engineOptions, adaptToDeviceRatio, sceneOptions, onRender, onSceneReady, renderChildrenWhenReady, children, ...rest } = props;
 
-    const [sceneContext, setSceneContext] = useState<SceneContextType>(DEFAULT_CONTEXT)
+    const [sceneContext, setSceneContext] = useState<SceneContextType>({
+        scene: null,
+        sceneReady: false
+    });
+
+    const [engineContext, setEngineContext] = useState<EngineCanvasContextType>({
+        engine: null,
+        canvas: null
+    });
 
     useEffect(() => {
         if (reactCanvas.current) {
             const engine = new Engine(reactCanvas.current, antialias, engineOptions, adaptToDeviceRatio);
+            setEngineContext(() => ({
+                engine,
+                canvas: reactCanvas.current
+            }));
+
             const scene = new Scene(engine, sceneOptions);
             const sceneIsReady = scene.isReady();
             if (sceneIsReady) {
-                props.onSceneReady(scene)
+                props.onSceneReady(scene);
             } else {
                 scene.onReadyObservable.addOnce((scene) => {
                     props.onSceneReady(scene);
@@ -171,7 +159,7 @@ export default (props: BabylonjsProps) => {
                 } else {
                     // @babylonjs/core throws an error if you attempt to render with no active camera.
                     // if we attach as a child React component we have frames with no active camera.
-                    console.warn('no active camera..')
+                    console.warn('no active camera..');
                 }
             })
 
@@ -198,16 +186,18 @@ export default (props: BabylonjsProps) => {
                 }
             }
         }
-    }, [reactCanvas])
+    }, [reactCanvas]);
 
     return (
         <>
             <canvas ref={reactCanvas} {...rest} />
-            <SceneContext.Provider value={sceneContext}>
-                {(renderChildrenWhenReady !== true || (renderChildrenWhenReady === true && sceneContext.sceneReady)) &&
-                    children
-                }
-            </SceneContext.Provider>
+            <EngineCanvasContext.Provider value={engineContext}>
+                <SceneContext.Provider value={sceneContext}>
+                    {(renderChildrenWhenReady !== true || (renderChildrenWhenReady === true && sceneContext.sceneReady)) &&
+                        children
+                    }
+                </SceneContext.Provider>
+            </EngineCanvasContext.Provider>
         </>
     );
 }
