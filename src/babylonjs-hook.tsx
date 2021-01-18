@@ -1,5 +1,10 @@
 import React, { useEffect, useContext, useRef, useState } from 'react';
-import { Engine, Scene, Nullable, EngineOptions, SceneOptions, EventState, Observer, Camera } from '@babylonjs/core';
+import { Camera } from '@babylonjs/core/Cameras/camera'
+import { Engine } from '@babylonjs/core/Engines/engine'
+import { EngineOptions } from '@babylonjs/core/Engines/thinEngine'
+import { EventState, Observer } from '@babylonjs/core/Misc/observable'
+import { Scene, SceneOptions } from '@babylonjs/core/scene'
+import { Nullable } from '@babylonjs/core/types'
 import { SceneContext, SceneContextType } from './scene';
 import { EngineCanvasContext, EngineCanvasContextType } from './engine';
 
