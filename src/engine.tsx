@@ -1,6 +1,6 @@
-import React, { createContext, useContext } from 'react'
-import { Engine } from '@babylonjs/core/Engines/engine'
-import { Nullable } from '@babylonjs/core/types'
+import React, { createContext, useContext } from'react';
+import { Engine } from '@babylonjs/core/Engines/engine';
+import { Nullable } from '@babylonjs/core/types';
 
 export type EngineCanvasContextType = {
     engine: Nullable<Engine>

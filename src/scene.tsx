@@ -1,6 +1,6 @@
-import { createContext, useContext } from 'react'
-import { Scene } from '@babylonjs/core/scene'
-import { Nullable } from '@babylonjs/core/types'
+import { createContext, useContext } from 'react';
+import { Scene } from '@babylonjs/core/scene';
+import { Nullable } from '@babylonjs/core/types';
 
 export type SceneContextType = {
     scene: Nullable<Scene>

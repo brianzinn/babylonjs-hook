@@ -85,8 +85,10 @@ export const useAfterRender = (callback: OnFrameRenderFn, mask?: number, insertF
  * @param createCameraFn function that creates and returns a camera
  * @param autoAttach Attach the input controls (default true)
  * @param noPreventDefault Events caught by controls should call prevent default
+ * @param useCtrlForPanning (ArcRotateCamera only)
+ * @param panningMoustButton (ArcRotateCamera only)
  */
-export const useCamera = <T extends Camera>(createCameraFn: (scene: Scene) => T, autoAttach: boolean = true, noPreventDefault: boolean = true): Nullable<T> => {
+export const useCamera = <T extends Camera>(createCameraFn: (scene: Scene) => T, autoAttach: boolean = true, noPreventDefault: boolean = true/*, useCtrlForPanning: boolean = false, panningMouseButton: number*/): Nullable<T> => {
     const { scene } = useContext(SceneContext);
     const cameraRef = useRef<Nullable<T>>(null);
 
@@ -96,20 +98,24 @@ export const useCamera = <T extends Camera>(createCameraFn: (scene: Scene) => T,
             return;
         }
 
-        const camera = createCameraFn(scene);
+        const camera: T = createCameraFn(scene);
         if (autoAttach === true) {
             const canvas: HTMLCanvasElement = scene.getEngine()!.getRenderingCanvas()!;
 
-            // This attaches the camera to the canvas
+            // This attaches the camera to the canvas - adding extra parameters breaks backwards compatibility
             // https://github.com/BabylonJS/Babylon.js/pull/9192 (keep canvas to work with < 4.2 beta-13)
-            (camera as any).attachControl(canvas, noPreventDefault);
+            // TODO: look at parameters of other camera types for attaching - likely need an 'options' parameter instead.
+            // if (camera instanceof ArcRotateCamera) {
+            //     camera.attachControl(noPreventDefault, useCtrlForPanning, panningMouseButton)
+            camera.attachControl(canvas, noPreventDefault);
         }
         cameraRef.current = camera;
 
         return () => {
             if (autoAttach === true) {
+                // canvas is only needed for < 4.1
                 const canvas: HTMLCanvasElement = scene.getEngine()!.getRenderingCanvas()!;
-                (camera as any).detachControl(canvas);
+                camera.detachControl(canvas);
             }
             camera.dispose();
         }
