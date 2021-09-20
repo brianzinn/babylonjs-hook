@@ -100,7 +100,7 @@ export const useCamera = <T extends Camera>(createCameraFn: (scene: Scene) => T,
 
         const camera: T = createCameraFn(scene);
         if (autoAttach === true) {
-            const canvas: HTMLCanvasElement = scene.getEngine()!.getRenderingCanvas()!;
+            const canvas: HTMLCanvasElement = scene.getEngine().getRenderingCanvas()!;
 
             // This attaches the camera to the canvas - adding extra parameters breaks backwards compatibility
             // https://github.com/BabylonJS/Babylon.js/pull/9192 (keep canvas to work with < 4.2 beta-13)
@@ -114,7 +114,7 @@ export const useCamera = <T extends Camera>(createCameraFn: (scene: Scene) => T,
         return () => {
             if (autoAttach === true) {
                 // canvas is only needed for < 4.1
-                const canvas: HTMLCanvasElement = scene.getEngine()!.getRenderingCanvas()!;
+                const canvas: HTMLCanvasElement = scene.getEngine().getRenderingCanvas()!;
                 camera.detachControl(canvas);
             }
             camera.dispose();
