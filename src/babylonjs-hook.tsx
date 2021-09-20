@@ -27,7 +27,7 @@ export type OnFrameRenderFn = (eventData: Scene, eventState: EventState) => void
 
 /**
  * Register a callback for before the scene renders.
- * 
+ *
  * @param callback called using onBeforeRender functionality of scene
  * @param mask the mask used to filter observers
  * @param insertFirst if true will be inserted at first position, if false (default) will be last position.
@@ -54,7 +54,7 @@ export const useBeforeRender = (callback: OnFrameRenderFn, mask?: number, insert
 
 /**
  * Register a callback for after the scene renders.
- * 
+ *
  * @param callback called using onBeforeRender functionality of scene
  * @param mask the mask used to filter observers
  * @param insertFirst if true will be inserted at first position, if false (default) will be last position.
