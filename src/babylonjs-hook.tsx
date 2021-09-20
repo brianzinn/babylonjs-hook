@@ -19,7 +19,6 @@ export type BabylonjsProps = {
     sceneOptions?: SceneOptions
     onSceneReady: (scene: Scene) => void
     onRender?: (scene: Scene) => void
-    id: string
     children?: React.ReactNode
 };
 
@@ -124,7 +123,7 @@ export const useCamera = <T extends Camera>(createCameraFn: (scene: Scene) => T,
     return cameraRef.current;
 }
 
-export default (props: BabylonjsProps) => {
+export default (props: BabylonjsProps & React.CanvasHTMLAttributes<HTMLCanvasElement>) => {
     const reactCanvas = useRef<Nullable<HTMLCanvasElement>>(null);
     const { antialias, engineOptions, adaptToDeviceRatio, sceneOptions, onRender, onSceneReady, renderChildrenWhenReady, children, ...rest } = props;
 
