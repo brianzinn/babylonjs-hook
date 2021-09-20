@@ -20,7 +20,7 @@
     "url": "https://github.com/brianzinn/babylonjs-hook"
   },
   "scripts": {
-    "lint": "tslint  --project tsconfig.json -t codeFrame 'src/**/*.tsx'",
+    "lint": "tslint --project tsconfig.json -t codeFrame 'src/**/*.tsx'",
     "prebuild": "rimraf dist",
     "build": "rollup -c rollup.config.ts && tsc -d --emitDeclarationOnly --declarationDir dist/types",
     "start": "rollup -c rollup.config.ts -w",

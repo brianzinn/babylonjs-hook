@@ -19,7 +19,6 @@ export type BabylonjsProps = {
     sceneOptions?: SceneOptions
     onSceneReady: (scene: Scene) => void
     onRender?: (scene: Scene) => void
-    id: string
     children?: React.ReactNode
 };
 
@@ -27,7 +26,7 @@ export type OnFrameRenderFn = (eventData: Scene, eventState: EventState) => void
 
 /**
  * Register a callback for before the scene renders.
- * 
+ *
  * @param callback called using onBeforeRender functionality of scene
  * @param mask the mask used to filter observers
  * @param insertFirst if true will be inserted at first position, if false (default) will be last position.
@@ -54,7 +53,7 @@ export const useBeforeRender = (callback: OnFrameRenderFn, mask?: number, insert
 
 /**
  * Register a callback for after the scene renders.
- * 
+ *
  * @param callback called using onBeforeRender functionality of scene
  * @param mask the mask used to filter observers
  * @param insertFirst if true will be inserted at first position, if false (default) will be last position.
@@ -100,7 +99,7 @@ export const useCamera = <T extends Camera>(createCameraFn: (scene: Scene) => T,
 
         const camera: T = createCameraFn(scene);
         if (autoAttach === true) {
-            const canvas: HTMLCanvasElement = scene.getEngine()!.getRenderingCanvas()!;
+            const canvas: HTMLCanvasElement = scene.getEngine().getRenderingCanvas()!;
 
             // This attaches the camera to the canvas - adding extra parameters breaks backwards compatibility
             // https://github.com/BabylonJS/Babylon.js/pull/9192 (keep canvas to work with < 4.2 beta-13)
@@ -114,7 +113,7 @@ export const useCamera = <T extends Camera>(createCameraFn: (scene: Scene) => T,
         return () => {
             if (autoAttach === true) {
                 // canvas is only needed for < 4.1
-                const canvas: HTMLCanvasElement = scene.getEngine()!.getRenderingCanvas()!;
+                const canvas: HTMLCanvasElement = scene.getEngine().getRenderingCanvas()!;
                 camera.detachControl(canvas);
             }
             camera.dispose();
@@ -124,7 +123,7 @@ export const useCamera = <T extends Camera>(createCameraFn: (scene: Scene) => T,
     return cameraRef.current;
 }
 
-export default (props: BabylonjsProps) => {
+export default (props: BabylonjsProps & React.CanvasHTMLAttributes<HTMLCanvasElement>) => {
     const reactCanvas = useRef<Nullable<HTMLCanvasElement>>(null);
     const { antialias, engineOptions, adaptToDeviceRatio, sceneOptions, onRender, onSceneReady, renderChildrenWhenReady, children, ...rest } = props;
 
