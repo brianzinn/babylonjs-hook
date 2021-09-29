@@ -151,20 +151,22 @@ export default (props: BabylonjsProps & React.CanvasHTMLAttributes<HTMLCanvasEle
 
       let resizeObserver: Nullable<ResizeObserver> = null;
 
+      const scene = new Scene(engine, sceneOptions);
+
       if (props.observeCanvasResize !== false && window.ResizeObserver) {
         resizeObserver = new ResizeObserver(() => {
           engine.resize();
-          // render to prevent flickering on resize
-          if (typeof onRender === 'function') {
-            onRender(scene);
+          if (scene.activeCamera /* needed for rendering */) {
+            // render to prevent flickering on resize
+            if (typeof onRender === 'function') {
+              onRender(scene);
+            }
+            scene.render();
           }
-          scene.render();
         });
         resizeObserver.observe(reactCanvas.current);
       }
 
-
-      const scene = new Scene(engine, sceneOptions);
       const sceneIsReady = scene.isReady();
       if (sceneIsReady) {
         props.onSceneReady(scene);
