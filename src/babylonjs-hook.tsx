@@ -21,7 +21,7 @@ export type BabylonjsProps = {
   /**
    * Automatically trigger engine resize when the canvas resizes (default: true)
    */
-  observeCanvasResize: boolean
+  observeCanvasResize?: boolean
   onRender?: (scene: Scene) => void
   children?: React.ReactNode
 };
