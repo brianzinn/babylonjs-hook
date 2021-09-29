@@ -154,6 +154,11 @@ export default (props: BabylonjsProps & React.CanvasHTMLAttributes<HTMLCanvasEle
       if (props.observeCanvasResize !== false && window.ResizeObserver) {
         resizeObserver = new ResizeObserver(() => {
           engine.resize();
+          // render to prevent flickering on resize
+          if (typeof onRender === 'function') {
+            onRender(scene);
+          }
+          scene.render();
         });
         resizeObserver.observe(reactCanvas.current);
       }
