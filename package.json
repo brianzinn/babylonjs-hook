@@ -58,7 +58,7 @@
     "typescript": "^4.4.3"
   },
   "peerDependencies": {
-    "@babylonjs/core": "4.x",
+    "@babylonjs/core": "4.x||>5.0.0-rc||5.x",
     "react": ">=16"
   }
 }
