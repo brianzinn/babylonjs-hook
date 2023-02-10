@@ -79,4 +79,6 @@ function App() {
 export default App;
 ```
 
+Codesandbox example from above extended with `useScene` hook and ways of connecting DOM and GUI:
+[codesandbox example](https://codesandbox.io/s/codesandbox-react-tsx-forked-l45zvu?file=/src/App.tsx)
 
